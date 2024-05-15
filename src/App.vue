@@ -1,8 +1,13 @@
 <template>
   <div id="app">
-      <h1> UCY & DIMAS CELL</h1>
+    <h1>UCY & DIMAS CELL</h1>
+    <header>
+      <button @click="currentView = 'todos'" :class="{ active: currentView === 'todos' }">Todos</button>
+      <button @click="currentView = 'posts'" :class="{ active: currentView === 'posts' }">Post</button>
+    </header>
+
+    <main v-if="currentView === 'todos'">
       <input v-model="kegiatanBaru" @keyup.enter="tambahKegiatan" placeholder="Tambahkan nama kartu" class="input-text">
-    <main>
       <input type="checkbox" v-model="filterSelesai" id="filterCheckbox">
       <label for="filterCheckbox">Tampilkan yang masih ada</label>
       <ul>
@@ -10,6 +15,19 @@
           <input type="checkbox" :checked="kegiatan.selesai" @change="toggleSelesai(kegiatan)" class="checkbox">
           <span :class="{ 'selesai': kegiatan.selesai }">{{ kegiatan.nama }}</span>
           <button @click="batalkanKegiatan(kegiatan.id)" v-if="!kegiatan.selesai" class="button">Hapus</button>
+        </li>
+      </ul>
+    </main>
+
+    <main v-else>
+      <label for="userSelect">Pilih User:</label>
+      <select v-model="selectedUser" @change="fetchPosts" id="userSelect">
+        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+      </select>
+      <ul>
+        <li v-for="post in posts" :key="post.id">
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.body }}</p>
         </li>
       </ul>
     </main>
@@ -21,9 +39,13 @@ export default {
   name: 'App',
   data() {
     return {
+      currentView: 'todos', // to track the current view
       kegiatanList: [],
       kegiatanBaru: '',
-      filterSelesai: false
+      filterSelesai: false,
+      users: [],
+      posts: [],
+      selectedUser: null
     };
   },
   computed: {
@@ -36,6 +58,16 @@ export default {
     }
   },
   methods: {
+    async fetchUsers() {
+      const response = await fetch('https://jsonplaceholder.typicode.com/users');
+      this.users = await response.json();
+    },
+    async fetchPosts() {
+      if (this.selectedUser) {
+        const response = await fetch(`https://jsonplaceholder.typicode.com/posts?userId=${this.selectedUser}`);
+        this.posts = await response.json();
+      }
+    },
     tambahKegiatan() {
       if (this.kegiatanBaru.trim() !== '') {
         this.kegiatanList.push({ id: Date.now(), nama: this.kegiatanBaru.trim(), selesai: false });
@@ -48,6 +80,9 @@ export default {
     toggleSelesai(kegiatan) {
       kegiatan.selesai = !kegiatan.selesai;
     }
+  },
+  mounted() {
+    this.fetchUsers();
   }
 };
 </script>
@@ -66,36 +101,43 @@ export default {
 h1 {
   margin: 0;
 }
-
+header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+button {
+  margin: 0 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+button.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
 main {
   margin-top: 20px;
 }
-
 ul {
   list-style: none;
   padding: 0;
 }
-
 li {
   margin-bottom: 10px;
   display: flex;
   align-items: center;
 }
-
 span.selesai {
   text-decoration: line-through;
 }
-
 .input-text {
   width: 70%;
   margin-right: 10px;
   padding: 5px;
 }
-
 .checkbox {
   margin-right: 5px;
 }
-
 .button {
   margin-left: auto;
 }
