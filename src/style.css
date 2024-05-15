@@ -23,7 +23,8 @@ a:hover {
 }
 
 body {
-  margin: 0;
+  background-color: #535bf2;
+  background-image: url(./assets/bg1.png);
   display: flex;
   place-items: center;
   min-width: 320px;
