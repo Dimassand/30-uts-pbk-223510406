@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import Todos from './Todos.vue';
+import Todos from './components/Todos.vue';
 
 export default {
   name: 'App',
