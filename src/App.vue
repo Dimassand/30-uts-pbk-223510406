@@ -7,16 +7,18 @@
     </header>
 
     <main v-if="currentView === 'todos'">
-      <input v-model="kegiatanBaru" @keyup.enter="tambahKegiatan" placeholder="Tambahkan nama kartu" class="input-text">
-      <input type="checkbox" v-model="filterSelesai" id="filterCheckbox">
-      <label for="filterCheckbox">Tampilkan yang masih ada</label>
-      <ul>
-        <li v-for="kegiatan in filteredKegiatan" :key="kegiatan.id">
-          <input type="checkbox" :checked="kegiatan.selesai" @change="toggleSelesai(kegiatan)" class="checkbox">
-          <span :class="{ 'selesai': kegiatan.selesai }">{{ kegiatan.nama }}</span>
-          <button @click="batalkanKegiatan(kegiatan.id)" v-if="!kegiatan.selesai" class="button">Hapus</button>
-        </li>
-      </ul>
+      <Todos
+        :kegiatanList="kegiatanList"
+        :filterSelesai="filterSelesai"
+        @toggle-selesai="toggleSelesai"
+        @batalkan-kegiatan="batalkanKegiatan"
+      >
+        <template #input>
+          <input v-model="kegiatanBaru" @keyup.enter="tambahKegiatan" placeholder="Tambahkan nama kartu" class="input-text">
+          <input type="checkbox" v-model="filterSelesai" id="filterCheckbox">
+          <label for="filterCheckbox">Tampilkan yang masih ada</label>
+        </template>
+      </Todos>
     </main>
 
     <main v-else>
@@ -35,8 +37,13 @@
 </template>
 
 <script>
+import Todos from './Todos.vue';
+
 export default {
   name: 'App',
+  components: {
+    Todos
+  },
   data() {
     return {
       currentView: 'todos', // to track the current view
@@ -47,15 +54,6 @@ export default {
       posts: [],
       selectedUser: null
     };
-  },
-  computed: {
-    filteredKegiatan() {
-      if (this.filterSelesai) {
-        return this.kegiatanList.filter(kegiatan => !kegiatan.selesai);
-      } else {
-        return this.kegiatanList;
-      }
-    }
   },
   methods: {
     async fetchUsers() {
@@ -127,18 +125,9 @@ li {
   display: flex;
   align-items: center;
 }
-span.selesai {
-  text-decoration: line-through;
-}
 .input-text {
   width: 70%;
   margin-right: 10px;
   padding: 5px;
-}
-.checkbox {
-  margin-right: 5px;
-}
-.button {
-  margin-left: auto;
 }
 </style>
